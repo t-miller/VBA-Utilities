@@ -24,7 +24,7 @@ Public Function SQLsqueezer(sqlString As String, serverAddress As String, Option
     'For Excel DB
     adoConnection.Open "Provider=SQLOLEDB.1;Server=" & serverAddress & ";Database=" & database & ";User Id=" & userID & ";Password=" & password & ";"
 
-    If UCase$(Left$(sqlString, 6)) = "SELECT" Then
+    If UCase(Left(sqlString, 6)) = "SELECT" Then
         adoRcdSource.Open sqlString, adoConnection, 3
         If shouldReturnListArray = True Then
             If (adoRcdSource.BOF Or adoRcdSource.EOF) = False Then
@@ -79,13 +79,13 @@ Public Function getQuarter(Optional offset As Long = 0, Optional ByVal dateSeed 
     dateSeed = DateAdd("q", offset, dateSeed)    'dateSeed + offset * 90
     Select Case Month(dateSeed) Mod 12
         Case 10, 11, 12, 0    'Zero case handles 12 mod 12
-            getQuarter = "Q1-" & Right$(Year(dateSeed) + 1, 2)
+            getQuarter = "Q1-" & Right(Year(dateSeed) + 1, 2)
         Case 1, 2, 3
-            getQuarter = "Q2-" & Right$(Year(dateSeed), 2)
+            getQuarter = "Q2-" & Right(Year(dateSeed), 2)
         Case 4, 5, 6
-            getQuarter = "Q3-" & Right$(Year(dateSeed), 2)
+            getQuarter = "Q3-" & Right(Year(dateSeed), 2)
         Case 7, 8, 9
-            getQuarter = "Q4-" & Right$(Year(dateSeed), 2)
+            getQuarter = "Q4-" & Right(Year(dateSeed), 2)
         Case Else
             getQuarter = "INVALID MONTH"
             If Not errorLog Is Nothing Then errorLog.logError "WARNING: Tried to get quarter for " & dateSeed & ", but the date is invalid."
@@ -139,9 +139,9 @@ Public Function getFiscalYear(Optional offset As Long = 0, Optional ByVal dateSe
 
     Select Case Month(dateSeed)
         Case 10, 11, 12
-            getFiscalYear = "FY" & Right$(Year(dateSeed) + 1, 2)
+            getFiscalYear = "FY" & Right(Year(dateSeed) + 1, 2)
         Case Else
-            getFiscalYear = "FY" & Right$(Year(dateSeed), 2)
+            getFiscalYear = "FY" & Right(Year(dateSeed), 2)
     End Select
 End Function
 
@@ -160,8 +160,8 @@ Public Sub InitializeColumnHeadersFor(sheetToInitialize As Worksheet, outputDict
     lastDataColumn = sheetToInitialize.UsedRange.Columns.Count
 
     For currentColumn = 1 To lastDataColumn
-        currentKey = Trim$(sheetToInitialize.Cells(headerRow, currentColumn).Value)
-        currentKey = Trim$(currentKey)
+        currentKey = Trim(sheetToInitialize.Cells(headerRow, currentColumn).Value)
+        currentKey = Trim(currentKey)
         numberOfRepeats = 1
         Do While outputDictionary.exists(currentKey)
             numberOfRepeats = numberOfRepeats + 1
@@ -192,7 +192,7 @@ Public Function stripDateFromSheetName(thisSheet As Worksheet) As String
     'created in the format mm-dd for convenience. This method assists in working with this style of sheet naming.
     
     If inString(thisSheet.Name, "-") Then
-        stripDateFromSheetName = Strings.Left$(thisSheet.Name, Strings.InStr(1, thisSheet.Name, "-") - 2)
+        stripDateFromSheetName = Strings.Left(thisSheet.Name, Strings.InStr(1, thisSheet.Name, "-") - 2)
     Else
         stripDateFromSheetName = thisSheet.Name
     End If
@@ -363,27 +363,27 @@ Private Function read2DExceptionList(fileName) As Dictionary
     Do While (Not (EOF(fHandle)))
         Line Input #fHandle, fLine
         LineNum = LineNum + 1
-        fLine = Trim$(fLine)
-        If fLine <> vbNullString And Strings.Left$(fLine, 1) <> "'" And Strings.Left$(fLine, 1) <> "#" Then    'comments delimited by ' or #
+        fLine = Trim(fLine)
+        If fLine <> vbNullString And Strings.Left(fLine, 1) <> "'" And Strings.Left(fLine, 1) <> "#" Then    'comments delimited by ' or #
             pos = InStr(1, fLine, "'")
             If pos = 0 Then pos = InStr(1, fLine, "#")
             If pos = 0 Then
                 strToKeep = fLine
             Else
-                strToKeep = Trim$(Left$(fLine, pos - 1))
+                strToKeep = Trim(Left(fLine, pos - 1))
             End If
 
             'split line into header and value:
             pos = Strings.InStr(1, strToKeep, delimiter)
             If pos = 0 Then
-                errorLog = errorLog & Chr$(9) & _
-                           "Missing ':' separator in line " & LineNum & ":   '" & strToKeep & "'" & Chr$(13)
+                errorLog = errorLog & Chr(9) & _
+                           "Missing ':' separator in line " & LineNum & ":   '" & strToKeep & "'" & Chr(13)
             ElseIf pos = 1 Then
-                errorLog = errorLog & Chr$(9) & _
-                           "Column header empty in line " & LineNum & ":   '" & strToKeep & "'" & Chr$(13)
+                errorLog = errorLog & Chr(9) & _
+                           "Column header empty in line " & LineNum & ":   '" & strToKeep & "'" & Chr(13)
             Else
-                headerMatch = Strings.Trim$(Strings.Left$(strToKeep, pos - 1))
-                valueMatch = Strings.Trim$(Strings.Mid$(strToKeep, pos + 1))
+                headerMatch = Strings.Trim(Strings.Left(strToKeep, pos - 1))
+                valueMatch = Strings.Trim(Strings.Mid(strToKeep, pos + 1))
 
                 If Not exceptionsDict.exists(headerMatch) Then
                     Set tempDict = New Scripting.Dictionary
@@ -400,8 +400,8 @@ Private Function read2DExceptionList(fileName) As Dictionary
 
     If errorLog <> vbNullString Then
         Dim resp As Integer
-        resp = MsgBox("Errors were found in " & FileName & ":" & Chr$(13) & Chr$(13) & errorLog & _
-                      Chr$(13) & "Continue anyway?", vbCritical + vbYesNo + vbDefaultButton2, "Error(s) in exception list!")
+        resp = MsgBox("Errors were found in " & fileName & ":" & Chr(13) & Chr(13) & errorLog & _
+                      Chr(13) & "Continue anyway?", vbCritical + vbYesNo + vbDefaultButton2, "Error(s) in exception list!")
         If resp = vbNo Then
             Exit Function
         End If
@@ -433,7 +433,7 @@ Function ReadTextFile(Fname As String, Length As Integer) As Variant
         Close #1
         
         Open Fname For Input As #1
-        ReadTextFile = Input$(Length, 1)
+        ReadTextFile = Input(Length, 1)
         Close 1
     Else
         ReadTextFile = False
